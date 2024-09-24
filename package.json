@@ -1,0 +1,20 @@
+{
+  "name": "practice",
+  "version": "1.0.0",
+  "description": "node practice",
+  "main": "index.js",
+  "scripts": {
+    "start" : "node src/app.js",
+    "dev" : "nodemon src/app.js"
+  },
+  "keywords": [
+    "javascript",
+    "node",
+    "mango"
+  ],
+  "author": "shiva ankuri",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
