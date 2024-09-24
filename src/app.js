@@ -1,27 +1,13 @@
 const express = require("express");
 const app = express();
 
-
-
-// app.use("/user", (req, res) => {
-//     res.send("Order matters");
-// });
-
-
-app.delete( "/test", (req, res) => {
-    res.send("Hello from the server is deleted");
-});
-// this will only handle GET call to /hello
-app.get("/hello", (req, res) => {
-    res.send({fistname:"shiva", lastname : "ankuri"});
-});
-
- app.post("/user", (req, res) => {
+// dynamic routing
+ app.use("/user/:userId/:name/:password", (req, res) => {
+    console.log(req.params)
     res.send("data successfully saved in database");
  })
 
- // This will match all the HTTP method API calls to /test
- app.use("/", (req, res) => {
+ app.use("/a/", (req, res) => {
     res.send("Home..");
 })
 
