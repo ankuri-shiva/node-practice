@@ -1,14 +1,24 @@
 const express = require("express");
 const app = express();
+const {adminAuth, userAuth} = require("./middlewares/auth.js");
 
-// dynamic routing
- app.use("/user/:userId/:name/:password", (req, res) => {
-    console.log(req.params)
-    res.send("data successfully saved in database");
+// authorisation 
+ app.use("/admin", adminAuth);
+
+ app.get("/user", userAuth , (req,res) => {
+    res.send("send user data");
+ });
+
+ app.post("/user/login", (req, res) => {
+    res.send("user login successfully");
  })
 
- app.use("/a/", (req, res) => {
-    res.send("Home..");
+ app.get("/admin/all", (req, res) => {
+    res.send("send all data")
+   
+});
+app.delete("/admin", (req,res) => {
+        res.send("to be deleted");
 })
 
 app.listen(7777, () => {
