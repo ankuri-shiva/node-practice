@@ -4,26 +4,50 @@ const connectDB = require("./config/database.js");
 const app = express();
 //onst {adminAuth, userAuth} = require("./middlewares/auth.js");
 
+app.use(express.json());
+
 app.post("/signup", async (req, res) => {
-    const user =  new User({
-        firstName : "virat",
-        lastName : "kohli",
-        email : "virat@gmail.com",
-        password : "virat@345",
-        gender : "male",
-    });
+    const user =  new User(req.body);
 
     try {
            //creating the new instance of the user model
             await user.save();
+            console.log(req.body)
             res.send("user added successfully");
     } catch(err) {
         res.status().send("some error occured");
     }
 });
 
+// GET user API
+
+app.get("/users", async (req, res) => {
+    const userName = req.body.firstName;
+    console.log(userName)
+    try {
+        const user = await User.find({firstName: userName});
+        if(user.length === 0){
+            res.status(400).send("user not found")
+        } else {
+        res.send(user);
+        }
+    } catch(err) {
+        res.status(400).send("something went wrong");
+    }
+})
 
 
+// get all users
+
+app.get("/users/all", async (req, res) => {
+       
+    try{
+        const users = await User.find({});
+        res.send(users);
+    } catch(err) {
+        res.status(400).send("something went wrong");
+    }
+})
 
 connectDB()
 .then(() => {
