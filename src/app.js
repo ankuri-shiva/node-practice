@@ -47,7 +47,34 @@ app.get("/users/all", async (req, res) => {
     } catch(err) {
         res.status(400).send("something went wrong");
     }
-})
+});
+
+//delete the user
+
+app.delete("/user", async (req, res) => {
+    const userId = req.body.userId;
+
+    try {
+            const user = await User.findByIdAndDelete({_id : userId});
+            res.send("user deleted successfully");
+    } catch(err) {
+        res.status(400).send("something went wrong");
+    }
+});
+
+//update the user 
+
+app.patch("/user", async (req, res) => {
+    const userId = req.body.userId;
+    const data = req.body;
+
+    try {
+        const user = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after"});
+        res.send(user);
+    } catch(err) {
+        res.status(400).send("something went wrong");
+    }
+});
 
 connectDB()
 .then(() => {
