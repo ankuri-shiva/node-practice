@@ -8,6 +8,7 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
     const user =  new User(req.body);
+    console.log(user)
 
     try {
            //creating the new instance of the user model
@@ -15,7 +16,7 @@ app.post("/signup", async (req, res) => {
             console.log(req.body)
             res.send("user added successfully");
     } catch(err) {
-        res.status().send("some error occured");
+        res.status().send("some error occured" + err.message);
     }
 });
 
