@@ -2,12 +2,14 @@ const express = require("express");
 const User = require("./models/user.js");
 const connectDB = require("./config/database.js");
 const { validateSignupData } = require("./utils/validators.js");
+const { userAuth } = require("./middlewares/auth.js");
 const bcrypt = require("bcrypt");
 const app = express();
+const cookieParser = require("cookie-parser");
 
-//onst {adminAuth, userAuth} = require("./middlewares/auth.js");
 
 app.use(express.json());
+app.use(cookieParser());
 
 //signup api
 app.post("/signup", async (req, res) => {
@@ -45,14 +47,25 @@ app.post("/login", async (req, res) => {
         const {email, password} = req.body;
     
         const user = await User.findOne({ email: email });
-        //console.log(user)
+        
         
         if(!user) {
             throw new Error("Invalid credintials");
         };
-        console.log(user.password, password)
-        const isPaswordCorrect = await bcrypt.compare(password, user.password);
+        const isPaswordCorrect = await user.validatePassword(password);
+
         if(isPaswordCorrect){
+
+            //create the JWT Token
+            const jwtToken = await user.getJwt()
+            //console.log(jwtToken);
+
+
+            //Add the token to the cookie send the respose back to the server
+            res.cookie("token", jwtToken, {
+                expires: new Date(Date.now() + 8 * 3600000),
+            });
+
             res.send("Login successfull!!");
         } else {
             throw new Error("Invalid credintials");
@@ -61,6 +74,23 @@ app.post("/login", async (req, res) => {
         res.status(400).send("Error " + err.message);
     }
     
+});
+
+
+//get profile api
+app.use("/profile", userAuth, async (req, res) => {
+    try{
+        const  user  = req.user;
+        res.send(user);
+    }catch(err) {
+        res.status(400).send("Error " + err.message);
+    }   
+});
+
+//send connenction api
+app.get("/sendConnectionRequest", userAuth, (req, res) => {
+    const user = req.user;
+    res.send(user.firstName + " sent connection request");
 });
 
 // GET user API
@@ -83,7 +113,7 @@ app.get("/users", async (req, res) => {
 
 // get all users
 
-app.get("/users/all", async (req, res) => {
+app.get("/feed", async (req, res) => {
        
     try{
         const users = await User.find({});
