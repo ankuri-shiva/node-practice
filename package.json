@@ -15,7 +15,10 @@
   "author": "shiva ankuri",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.21.0",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "validator": "^13.12.0",
+    "validators": "^0.3.1"
   }
 }
