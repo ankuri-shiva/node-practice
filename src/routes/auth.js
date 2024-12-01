@@ -1,8 +1,9 @@
 const express = require("express");
 const {userAuth} = require("../middlewares/auth.js");
+const validator = require("validator");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.js");
-const {validateSignupData} = require("../utils/validators.js");
+const {validateSignupData, validateUserData} = require("../utils/validators.js");
 const authRouter = express.Router();
 
 
@@ -16,7 +17,6 @@ authRouter.post("/signup", async (req, res) => {
 
            //encrypt the password
            const hashedPassword = await bcrypt.hash(password, 10);
-           console.log(hashedPassword)
 
           //creating the new instance of the user model
           const user =  new User({
@@ -47,7 +47,7 @@ authRouter.post("/login", async (req, res) => {
         if(isPaswordCorrect){
 
             //create the JWT Token
-            const jwtToken = await user.getJwt()
+            const jwtToken = await user.getJwt();
             //console.log(jwtToken);
 
 
@@ -65,5 +65,55 @@ authRouter.post("/login", async (req, res) => {
     }
     
 });
+
+authRouter.post("/logout", (req, res) => {
+    res.cookie("token", null, {
+        expires: new Date(Date.now()),
+    });
+    res.send("Logout successfull!!")
+});
+
+authRouter.patch("/profile/edit", userAuth, async (req, res) => {
+    try {
+        if(!validateUserData(req)){
+            throw new Error("Invalid Edit fields");
+        };
+    
+        const user = req.user;
+    
+        Object.keys(req.body).forEach(eachKey => user[eachKey] = req.body[eachKey]);
+        user.save();
+        res.send("Updated successfully");
+    } catch(err) {
+        res.status(400).send("Error " + err.message);
+    }
+
+});
+
+authRouter.patch("/password/edit", async(req, res) => {
+    try {
+        const {email, password} = req.body;
+        const isPasswordValid = validator.isStrongPassword(password);
+        if(!isPasswordValid){
+            throw new Error("Please enter the strong password");
+        };
+
+        const user = await User.findOne({email: email});
+        
+        if(!user){
+            throw new Error("Invalid credintials");
+        };
+
+        Object.keys(req.body).forEach(eachKey => user[eachKey] = req.body[eachKey]);
+        const hashedPassword = await bcrypt.hash(user.password, 10);
+        user.password = hashedPassword;
+        await user.save()
+        res.send("password updated successfully");
+
+    } catch(err) {
+        res.status(400).send("Error: " + err.message);
+    };
+});
+
 
 module.exports = authRouter;

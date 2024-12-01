@@ -16,8 +16,15 @@ const validateSignupData = (req) => {
                 throw new Error("Please enter the strong password")
             }
         
-    }
+    };
+
+    const validateUserData = (req) => {
+        const ALLOW_EDITABLE_FILEDS = ["firstName", "lastName", "age", "gender", "about", "skills"];
+
+        return Object.keys(req.body).every(field => ALLOW_EDITABLE_FILEDS.includes(field));  
+    };
 
     module.exports = {
-        validateSignupData
-    }
+        validateSignupData,
+        validateUserData
+    };
