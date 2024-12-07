@@ -8,7 +8,7 @@ const ConnectionRequest = require("../models/connectionRequest.js")
 
 
 //send connenction api
-requestRouter.get("/sendConnectionRequest", userAuth, (req, res) => {
+requestRouter.get("/sendConnectionRequest", userAuth, async (req, res) => {
     const user = req.user;
     res.send(user.firstName + " sent connection request");
 });
@@ -57,6 +57,40 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
         });
     } catch(err) {
         res.status(400).send("ERROR: "+ err.message);
+    }
+});
+
+
+requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
+    try{
+        const loggedInUser = req.user;
+        const {status} = req.params
+        const requestId = req.params.requestId;
+        console.log(requestId)
+
+        //validate the status
+        const allowedStatus = ["accepted", "rejected"];
+        if(!allowedStatus.includes(status)){
+            return res.status(400).json({message: "Invalid status type"});
+        };
+
+        //check if request exist
+
+       const connectionRequest = await ConnectionRequest.findOne({
+        _id : requestId,
+        toUserId : loggedInUser._id,
+        status : "interested",
+       });
+        
+        if(!connectionRequest){
+            return res.status(404).json({message: "connection Request not found"});
+        };
+        connectionRequest.status = status;
+        const data = await connectionRequest.save();
+        
+        res.json({message: loggedInUser.firstName + " is " + status, data});
+    }catch(err) {
+        res.status(404).send("ERROR: " + err.message);
     }
 });
 
